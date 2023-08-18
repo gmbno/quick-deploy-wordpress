@@ -1,0 +1,18 @@
+version: '3.3'
+services:
+  certbot:
+    container_name: certbot
+    image: certbot/certbot
+    volumes:
+      - ../letsencrypt:/etc/letsencrypt
+    command: certonly --dry-run --standalone -d ${DOMAIN} --email=${EMAIL} --agree-tos  --no-eff-email --non-interactive --http-01-port=8888
+
+  haproxy:
+    container_name: haproxy
+    image: haproxy
+    links:
+      - certbot
+    ports:
+      - "80:80"
+    volumes:
+      - ./haproxy_data/:/usr/local/etc/haproxy

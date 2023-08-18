@@ -1,0 +1,9 @@
+mysql_data/*
+wordpress_data/*
+certs/*
+letsencrypt/*
+
+!mysql_data/.gitkeep
+!wordpress_data/.gitkeep
+!certs/.gitkeep
+!letsencrypt/.gitkeep

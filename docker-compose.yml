@@ -1,0 +1,54 @@
+version: '3.3'
+services:
+  mysql:
+    container_name: mysql
+    image: mysql
+    volumes:
+      - ./mysql_data/:/var/lib/mysql
+    restart: always
+    env_file:
+      - mysql.env
+
+  wordpress:
+    container_name: wordpress
+    build: .
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    volumes:
+      - ./wordpress_data/:/var/www/html/
+    restart: always
+
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin
+    depends_on:
+      - mysql
+    links:
+      - mysql
+    restart: always
+    environment:
+      PMA_HOST: mysql
+
+  certbot:
+    container_name: certbot
+    image: certbot/certbot
+    volumes:
+      - ./letsencrypt:/etc/letsencrypt
+    command: renew -v --dry-run --force-renew
+
+  haproxy:
+    container_name: haproxy
+    image: haproxy
+    links:
+      - wordpress
+      - phpmyadmin
+      - certbot
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./haproxy_data/:/usr/local/etc/haproxy
+      - ./certs:/etc/ssl/certs/
+    restart: always
