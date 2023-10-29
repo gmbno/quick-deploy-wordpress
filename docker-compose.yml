@@ -6,8 +6,8 @@ services:
     volumes:
       - ./mysql_data/:/var/lib/mysql
     restart: always
-    env_file:
-      - mysql.env
+    environment:
+      MYSQL_ROOT_PASSWORD: CHANGETHIS
 
   wordpress:
     container_name: wordpress
@@ -31,24 +31,17 @@ services:
     environment:
       PMA_HOST: mysql
 
-  certbot:
-    container_name: certbot
-    image: certbot/certbot
-    volumes:
-      - ./letsencrypt:/etc/letsencrypt
-    command: renew -v --dry-run --force-renew
-
   haproxy:
     container_name: haproxy
     image: haproxy
+    depends_on:
+      - wordpress
     links:
       - wordpress
       - phpmyadmin
-      - certbot
     ports:
-      - "80:80"
       - "443:443"
     volumes:
       - ./haproxy_data/:/usr/local/etc/haproxy
-      - ./certs:/etc/ssl/certs/
+      - ./letsencrypt/live/lucasgambini.dev/bundle.pem:/etc/ssl/certs/bundle.pem
     restart: always
